@@ -144,5 +144,39 @@ class PostgresqlAdapterTest < ActionCable::TestCase
 
     remaining_payload_ids = pg_conn.query("SELECT id FROM #{large_payloads_table} ORDER BY id").values.flatten
     assert_equal [inserts_per_delete - 1, inserts_per_delete], remaining_payload_ids
+  ensure
+    pg_conn&.close
+  end
+
+  # Specifying database_url should bypass ActiveRecord and connect directly to the provided database
+  def test_explicit_database_url_configuration
+    large_payloads_table = ActionCable::SubscriptionAdapter::EnhancedPostgresql::LARGE_PAYLOADS_TABLE
+    explicit_database = "actioncable_enhanced_postgresql_test_explicit"
+
+    ActiveRecord::Base.connection_pool.with_connection do |connection|
+      connection.execute("CREATE DATABASE #{explicit_database}")
+    rescue ActiveRecord::DatabaseAlreadyExists
+    end
+
+    pg_conn = PG::Connection.open(dbname: explicit_database)
+    pg_conn.exec("DROP TABLE IF EXISTS #{large_payloads_table}")
+
+    server = ActionCable::Server::Base.new
+    server.config.cable = cable_config.merge(database_url: "postgres://localhost/#{explicit_database}").with_indifferent_access
+    server.config.logger = Logger.new(StringIO.new).tap { |l| l.level = Logger::UNKNOWN }
+    adapter = server.config.pubsub_adapter.new(server)
+
+    large_payload = "a" * (ActionCable::SubscriptionAdapter::EnhancedPostgresql::MAX_NOTIFY_SIZE + 1)
+
+    subscribe_as_queue("channel", adapter) do |queue|
+      adapter.broadcast("channel", large_payload)
+
+      # The large payload is stored in the database at this point
+      assert_equal "1", pg_conn.query("SELECT COUNT(*) FROM #{large_payloads_table}").first.fetch("count")
+
+      assert_equal large_payload, queue.pop
+    end
+  ensure
+    pg_conn&.close
   end
 end

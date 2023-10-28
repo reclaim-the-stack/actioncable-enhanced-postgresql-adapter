@@ -1,4 +1,4 @@
 1.0.0
 
-- Initial release
 - Support > 8000 byte payloads
+- Remove hard dependency on ActiveRecord
