@@ -7,4 +7,5 @@ gemspec
 group :development, :test do
   gem "activesupport"
   gem "debug"
+  gem "minitest-reporters"
 end

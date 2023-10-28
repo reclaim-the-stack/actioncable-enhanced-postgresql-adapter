@@ -7,6 +7,9 @@ require "action_cable"
 require "active_support/testing/autorun"
 require "active_support/testing/method_call_assertions"
 
+require "minitest/reporters"
+Minitest::Reporters.use!
+
 # Set test adapter and logger
 ActionCable.server.config.cable = { "adapter" => "test" }
 ActionCable.server.config.logger = Logger.new(nil)
