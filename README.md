@@ -54,3 +54,8 @@ Note that whichever ActionCable adapter you're using, sending large payloads wit
 
 Deletion of stale payloads (10 minutes or older) are triggered every 100 large payload inserts. We do this by looking at the incremental ID generated on insert and checking if it is evenly divisible by 100. This approach avoids having to manually schedule cleanup jobs while striking a balance between performance and cleanup frequency.
 
+## Development
+
+- Clone repo
+- `bundle install` to install dependencies
+- `bundle exec ruby test/postgresql_test.rb` to run tests
