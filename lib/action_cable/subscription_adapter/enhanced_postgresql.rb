@@ -56,7 +56,7 @@ module ActionCable
       def payload_encryptor
         @payload_encryptor ||= begin
           secret = @server.config.cable[:payload_encryptor_secret]
-          secret ||= Rails.application.secret_key_base if Object.const_defined?("Rails")
+          secret ||= Rails.application.secret_key_base if defined? Rails
           secret ||= ENV["SECRET_KEY_BASE"]
 
           raise ArgumentError, "Missing payload_encryptor_secret configuration for ActionCable EnhancedPostgresql adapter. You need to either explicitly configure it in cable.yml or set the SECRET_KEY_BASE environment variable." unless secret
