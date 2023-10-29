@@ -4,6 +4,16 @@ This gem provides an enhanced PostgreSQL adapter for ActionCable. It is based on
 - Ability to broadcast payloads larger than 8000 bytes
 - Not dependent on ActiveRecord (but can still integrate with it if available)
 
+### Approach
+
+To overcome the 8000 bytes limit, we temporarily store large payloads in an [unlogged](https://www.crunchydata.com/blog/postgresl-unlogged-tables) database table named `action_cable_large_payloads`. The table is lazily created on first broadcast.
+
+We then broadcast a payload in the style of `__large_payload:<encrypted-payload-id>`. The listener client then decrypts incoming ID's, fetches the original payload from the database, and replaces the temporary payload before invoking the subscriber callback.
+
+ID encryption is done to prevent spoofing large payloads by manually broadcasting messages prefixed with `__large_payload:` with just an auto incrementing integer.
+
+Note that payloads smaller than 8000 bytes are sent directly via NOTIFY, as per the original adapter.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -23,16 +33,6 @@ development:
 production:
   adapter: enhanced_postgresql
 ```
-
-## Approach
-
-To overcome the 8000 bytes limit, we temporarily store large payloads in an unlogged database table named `action_cable_large_payloads`. The table is lazily created on first broadcast.
-
-We then broadcast a payload in the style of `__large_payload:<encrypted-payload-id>`. The listener client then decrypts incoming ID's, fetches the original payload from the database, and replaces the temporary payload before invoking the subscriber callback.
-
-ID encryption is done to prevent spoofing large payloads by manually broadcasting messages prefixed with `__large_payload:` with just an auto incrementing integer.
-
-Note that payloads smaller than 8000 bytes are sent directly via NOTIFY, as per the original adapter.
 
 ## Configuration
 
