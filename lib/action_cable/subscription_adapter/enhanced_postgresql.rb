@@ -25,7 +25,7 @@ module ActionCable
       def initialize(*)
         super
 
-        @database_url = @server.config.cable[:database_url]
+        @url = @server.config.cable[:url]
         @connection_pool_size = @server.config.cable[:connection_pool_size] || ENV["RAILS_MAX_THREADS"] || 5
       end
 
@@ -66,7 +66,7 @@ module ActionCable
       end
 
       def with_broadcast_connection(&block)
-        return super unless @database_url
+        return super unless @url
 
         connection_pool.with do |pg_conn|
           yield pg_conn
@@ -75,9 +75,9 @@ module ActionCable
 
       # Called from the Listener thread
       def with_subscriptions_connection(&block)
-        return super unless @database_url
+        return super unless @url
 
-        pg_conn = PG::Connection.new(@database_url)
+        pg_conn = PG::Connection.new(@url)
         pg_conn.exec("SET application_name = #{pg_conn.escape_identifier(identifier)}")
         yield pg_conn
       ensure
@@ -88,7 +88,7 @@ module ActionCable
 
       def connection_pool
         @connection_pool ||= ConnectionPool.new(size: @connection_pool_size, timeout: 5) do
-          PG::Connection.new(@database_url)
+          PG::Connection.new(@url)
         end
       end
 

@@ -148,8 +148,8 @@ class PostgresqlAdapterTest < ActionCable::TestCase
     pg_conn&.close
   end
 
-  # Specifying database_url should bypass ActiveRecord and connect directly to the provided database
-  def test_explicit_database_url_configuration
+  # Specifying url should bypass ActiveRecord and connect directly to the provided database
+  def test_explicit_url_configuration
     large_payloads_table = ActionCable::SubscriptionAdapter::EnhancedPostgresql::LARGE_PAYLOADS_TABLE
     explicit_database = "actioncable_enhanced_postgresql_test_explicit"
 
@@ -162,7 +162,7 @@ class PostgresqlAdapterTest < ActionCable::TestCase
     pg_conn.exec("DROP TABLE IF EXISTS #{large_payloads_table}")
 
     server = ActionCable::Server::Base.new
-    server.config.cable = cable_config.merge(database_url: "postgres://localhost/#{explicit_database}").with_indifferent_access
+    server.config.cable = cable_config.merge(url: "postgres://localhost/#{explicit_database}").with_indifferent_access
     server.config.logger = Logger.new(StringIO.new).tap { |l| l.level = Logger::UNKNOWN }
     adapter = server.config.pubsub_adapter.new(server)
 

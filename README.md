@@ -39,8 +39,8 @@ production:
 The following configuration options are available:
 
 - `payload_encryptor_secret` - The secret used to encrypt large payload ID's. Defaults to `Rails.application.secret_key_base` or the `SECRET_KEY_BASE` environment variable unless explicitly specified. Must be 32 bytes long.
-- `database_url` - Set this if you want to use a different database than the one provided by ActiveRecord. Must be a valid PostgreSQL connection string.
-- `connection_pool_size` - Set this in conjunction with `database_url` to set the size of the postgres connection pool used for broadcasts. Defaults to `RAILS_MAX_THREADS` environment variable or falls back to 5.
+- `url` - Set this if you want to use a different database than the one provided by ActiveRecord. Must be a valid PostgreSQL connection string.
+- `connection_pool_size` - Set this in conjunction with `url` to set the size of the postgres connection pool used for broadcasts. Defaults to `RAILS_MAX_THREADS` environment variable or falls back to 5.
 
 ## Performance
 
