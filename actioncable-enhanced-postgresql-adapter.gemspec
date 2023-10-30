@@ -19,5 +19,6 @@ Gem::Specification.new do |spec|
   spec.files = %w[README.md CHANGELOG.md actioncable-enhanced-postgresql-adapter.gemspec] + Dir["lib/**/*"]
 
   spec.add_dependency "actioncable", ">= 6.0"
+  spec.add_dependency "connection_pool", ">= 2.2.5" # Ruby 2.7 compatible version
   spec.add_dependency "pg", "~> 1.5"
 end
