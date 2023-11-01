@@ -18,6 +18,10 @@ module ActionCable
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       SQL
+      CREATE_CREATED_AT_INDEX_QUERY = <<~SQL
+        CREATE INDEX IF NOT EXISTS index_action_cable_large_payloads_on_created_at
+        ON #{LARGE_PAYLOADS_TABLE} (created_at)
+      SQL
       INSERT_LARGE_PAYLOAD_QUERY = "INSERT INTO #{LARGE_PAYLOADS_TABLE} (payload, created_at) VALUES ($1, CURRENT_TIMESTAMP) RETURNING id"
       SELECT_LARGE_PAYLOAD_QUERY = "SELECT payload FROM #{LARGE_PAYLOADS_TABLE} WHERE id = $1"
       DELETE_LARGE_PAYLOAD_QUERY = "DELETE FROM #{LARGE_PAYLOADS_TABLE} WHERE created_at < CURRENT_TIMESTAMP - INTERVAL '2 minutes'"
@@ -98,6 +102,7 @@ module ActionCable
         result.first.fetch("id").to_i
       rescue PG::UndefinedTable
         pg_conn.exec(CREATE_LARGE_TABLE_QUERY)
+        pg_conn.exec(CREATE_CREATED_AT_INDEX_QUERY)
         retry
       end
 
