@@ -52,7 +52,7 @@ Note that whichever ActionCable adapter you're using, sending large payloads wit
 
 ### Cleanup of large payloads
 
-Deletion of stale payloads (10 minutes or older) are triggered every 100 large payload inserts. We do this by looking at the incremental ID generated on insert and checking if it is evenly divisible by 100. This approach avoids having to manually schedule cleanup jobs while striking a balance between performance and cleanup frequency.
+Deletion of stale payloads (2 minutes or older) are triggered every 100 large payload inserts. We do this by looking at the incremental ID generated on insert and checking if it is evenly divisible by 100. This approach avoids having to manually schedule cleanup jobs while striking a balance between performance and cleanup frequency.
 
 ## Development
 

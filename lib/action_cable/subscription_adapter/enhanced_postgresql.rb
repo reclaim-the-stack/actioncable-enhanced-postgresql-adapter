@@ -40,7 +40,7 @@ module ActionCable
             payload_id = insert_large_payload(pg_conn, payload)
 
             if payload_id % INSERTS_PER_DELETE == 0
-              pg_conn.exec_params(DELETE_LARGE_PAYLOAD_QUERY, [10.minutes.ago])
+              pg_conn.exec_params(DELETE_LARGE_PAYLOAD_QUERY, [2.minutes.ago])
             end
 
             # Encrypt payload_id to prevent simple integer ID spoofing
