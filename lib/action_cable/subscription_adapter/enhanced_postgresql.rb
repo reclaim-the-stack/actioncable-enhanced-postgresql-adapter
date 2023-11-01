@@ -61,7 +61,8 @@ module ActionCable
 
           raise ArgumentError, "Missing payload_encryptor_secret configuration for ActionCable EnhancedPostgresql adapter. You need to either explicitly configure it in cable.yml or set the SECRET_KEY_BASE environment variable." unless secret
 
-          ActiveSupport::MessageEncryptor.new(secret)
+          secret_32_byte = Digest::SHA256.digest(secret)
+          ActiveSupport::MessageEncryptor.new(secret_32_byte)
         end
       end
 
