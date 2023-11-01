@@ -124,13 +124,12 @@ class PostgresqlAdapterTest < ActionCable::TestCase
     pg_conn.exec("DROP TABLE IF EXISTS #{large_payloads_table}")
     pg_conn.exec(ActionCable::SubscriptionAdapter::EnhancedPostgresql::CREATE_LARGE_TABLE_QUERY)
 
-    insert_query = "INSERT INTO #{large_payloads_table} (payload, created_at) VALUES ('a', $1) RETURNING id"
-    # Insert 98 rows older than 10 minutes
+    # Insert 98 stale payloads
     (inserts_per_delete - 2).times do
-      pg_conn.exec_params(insert_query, [11.minutes.ago])
+      pg_conn.exec("INSERT INTO #{large_payloads_table} (payload, created_at) VALUES ('a', NOW() - INTERVAL '3 minutes') RETURNING id")
     end
-    # Insert 1 row newer than 10 minutes
-    new_payload_id = pg_conn.exec_params(insert_query, [9.minutes.ago]).first.fetch("id")
+    # Insert 1 fresh payload
+    new_payload_id = pg_conn.exec("INSERT INTO #{large_payloads_table} (payload, created_at) VALUES ('a', NOW() - INTERVAL '1 minutes') RETURNING id").first.fetch("id")
 
     # Sanity check that the auto incrementing ID is what we expect
     assert_equal inserts_per_delete - 1, new_payload_id

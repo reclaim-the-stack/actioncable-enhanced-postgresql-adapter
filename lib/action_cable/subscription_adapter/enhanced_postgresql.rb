@@ -15,12 +15,12 @@ module ActionCable
         CREATE UNLOGGED TABLE IF NOT EXISTS #{LARGE_PAYLOADS_TABLE} (
           id SERIAL PRIMARY KEY,
           payload TEXT NOT NULL,
-          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       SQL
-      INSERT_LARGE_PAYLOAD_QUERY = "INSERT INTO #{LARGE_PAYLOADS_TABLE} (payload, created_at) VALUES ($1, $2) RETURNING id"
+      INSERT_LARGE_PAYLOAD_QUERY = "INSERT INTO #{LARGE_PAYLOADS_TABLE} (payload, created_at) VALUES ($1, CURRENT_TIMESTAMP) RETURNING id"
       SELECT_LARGE_PAYLOAD_QUERY = "SELECT payload FROM #{LARGE_PAYLOADS_TABLE} WHERE id = $1"
-      DELETE_LARGE_PAYLOAD_QUERY = "DELETE FROM #{LARGE_PAYLOADS_TABLE} WHERE created_at < $1"
+      DELETE_LARGE_PAYLOAD_QUERY = "DELETE FROM #{LARGE_PAYLOADS_TABLE} WHERE created_at < CURRENT_TIMESTAMP - INTERVAL '2 minutes'"
 
       def initialize(*)
         super
@@ -40,7 +40,7 @@ module ActionCable
             payload_id = insert_large_payload(pg_conn, payload)
 
             if payload_id % INSERTS_PER_DELETE == 0
-              pg_conn.exec_params(DELETE_LARGE_PAYLOAD_QUERY, [2.minutes.ago])
+              pg_conn.exec(DELETE_LARGE_PAYLOAD_QUERY)
             end
 
             # Encrypt payload_id to prevent simple integer ID spoofing
@@ -94,7 +94,7 @@ module ActionCable
       end
 
       def insert_large_payload(pg_conn, payload)
-        result = pg_conn.exec_params(INSERT_LARGE_PAYLOAD_QUERY, [payload, Time.now])
+        result = pg_conn.exec_params(INSERT_LARGE_PAYLOAD_QUERY, [payload])
         result.first.fetch("id").to_i
       rescue PG::UndefinedTable
         pg_conn.exec(CREATE_LARGE_TABLE_QUERY)
