@@ -19,7 +19,7 @@ Note that payloads smaller than 8000 bytes are sent directly via NOTIFY, as per 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "actioncable-enhanced-postgresql-adapter", git: "https://github.com/reclaim-the-stack/actioncable-enhanced-postgresql-adapter"
+gem "actioncable-enhanced-postgresql-adapter"
 ```
 
 ## Usage
