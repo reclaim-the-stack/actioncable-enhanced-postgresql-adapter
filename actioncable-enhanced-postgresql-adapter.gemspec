@@ -1,12 +1,12 @@
 Gem::Specification.new do |spec|
   spec.name = "actioncable-enhanced-postgresql-adapter"
-  spec.version = "1.0.0"
+  spec.version = "1.0.1"
   spec.authors = ["David Backeus"]
   spec.email = ["david.backeus@mynewsdesk.com"]
 
   spec.summary = "ActionCable adapter for PostgreSQL that enhances the default."
-  spec.description = "Handles the 8000 byte limit for PostgreSQL NOTIFY payloads"
-  spec.homepage = "https://github.com/dbackeus/actioncable-enhanced-postgresql-adapter"
+  spec.description = "Enhances ActionCable's built in Postgres adapter with handling of the 8000 byte limit for PostgreSQL NOTIFY payloads and allows usage without ActiveRecord."
+  spec.homepage = "https://github.com/reclaim-the-stack/actioncable-enhanced-postgresql-adapter"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.7.0"
 
