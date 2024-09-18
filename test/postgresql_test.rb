@@ -113,6 +113,36 @@ class PostgresqlAdapterTest < ActionCable::TestCase
     end
   end
 
+  def test_large_payload_escapes_correctly
+    large_payloads_table = ActionCable::SubscriptionAdapter::EnhancedPostgresql::LARGE_PAYLOADS_TABLE
+    ActiveRecord::Base.connection_pool.with_connection do |connection|
+      connection.execute("DROP TABLE IF EXISTS #{large_payloads_table}")
+    end
+
+    server = ActionCable::Server::Base.new
+    server.config.cable = cable_config.with_indifferent_access
+    server.config.logger = Logger.new(StringIO.new).tap { |l| l.level = Logger::UNKNOWN }
+    adapter = server.config.pubsub_adapter.new(server)
+
+    ascii_string = (32..126).map(&:chr).join.encode("UTF-8")
+
+    expected_length = (ActionCable::SubscriptionAdapter::EnhancedPostgresql::MAX_NOTIFY_SIZE + 1)
+
+    large_payload = (ascii_string * (1.0 * expected_length/ascii_string.length).ceil)[...expected_length]
+
+    subscribe_as_queue("channel", adapter) do |queue|
+      adapter.broadcast("channel", large_payload)
+
+      # The large payload is stored in the database at this point
+      assert_equal 1, ActiveRecord::Base.connection.query("SELECT COUNT(*) FROM #{large_payloads_table}").first.first
+
+      got = queue.pop
+
+      assert_equal large_payload.length, got.length, "Expected lengths to match"
+      assert_equal large_payload, got, "Expected values to match"
+    end
+  end
+
   def test_automatic_payload_deletion
     inserts_per_delete = ActionCable::SubscriptionAdapter::EnhancedPostgresql::INSERTS_PER_DELETE
     large_payloads_table = ActionCable::SubscriptionAdapter::EnhancedPostgresql::LARGE_PAYLOADS_TABLE

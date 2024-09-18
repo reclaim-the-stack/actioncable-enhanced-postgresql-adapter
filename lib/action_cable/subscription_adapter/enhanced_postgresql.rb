@@ -38,7 +38,6 @@ module ActionCable
 
         with_broadcast_connection do |pg_conn|
           channel = pg_conn.escape_identifier(channel_identifier(channel))
-          payload = pg_conn.escape_string(payload)
 
           if payload.bytesize > MAX_NOTIFY_SIZE
             payload_id = insert_large_payload(pg_conn, payload)
@@ -53,7 +52,7 @@ module ActionCable
             payload = "#{LARGE_PAYLOAD_PREFIX}#{encrypted_payload_id}"
           end
 
-          pg_conn.exec("NOTIFY #{channel}, '#{payload}'")
+          pg_conn.exec("NOTIFY #{channel}, #{pg_conn.escape_literal(payload)}")
         end
       end
 
