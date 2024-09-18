@@ -13,7 +13,15 @@ class PostgresqlAdapterTest < ActionCable::TestCase
   include ChannelPrefixTest
 
   def setup
-    database_config = { "adapter" => "postgresql", "database" => "actioncable_enhanced_postgresql_test" }
+    database_config = {
+      "adapter" => "postgresql",
+      "database" => "actioncable_enhanced_postgresql_test",
+      "host": ENV.fetch("DB_HOST"),
+      "username": ENV.fetch("DB_USERNAME"),
+      "password": ENV.fetch("DB_PASSWORD")
+    }
+
+    database_config.merge(port: ENV["DB_PORT"]) unless ENV["DB_PORT"].empty?
 
     # Create the database unless it already exists
     begin
@@ -157,11 +165,11 @@ class PostgresqlAdapterTest < ActionCable::TestCase
     rescue ActiveRecord::DatabaseAlreadyExists
     end
 
-    pg_conn = PG::Connection.open(dbname: explicit_database)
+    pg_conn = PG::Connection.new("#{ENV.fetch("DB_URL")}/#{explicit_database}")
     pg_conn.exec("DROP TABLE IF EXISTS #{large_payloads_table}")
 
     server = ActionCable::Server::Base.new
-    server.config.cable = cable_config.merge(url: "postgres://localhost/#{explicit_database}").with_indifferent_access
+    server.config.cable = cable_config.merge(url: "#{ENV.fetch("DB_URL")}/#{explicit_database}").with_indifferent_access
     server.config.logger = Logger.new(StringIO.new).tap { |l| l.level = Logger::UNKNOWN }
     adapter = server.config.pubsub_adapter.new(server)
 

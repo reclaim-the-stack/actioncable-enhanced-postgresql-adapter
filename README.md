@@ -58,4 +58,13 @@ Deletion of stale payloads (2 minutes or older) are triggered every 100 large pa
 
 - Clone repo
 - `bundle install` to install dependencies
-- `bundle exec ruby test/postgresql_test.rb` to run tests
+- Ensure you have docker-engine and run
+  ```
+  bundle exec rake
+  ```
+
+- Alternatively
+  ```
+  bundle exec rake test
+  ```
+- See `Rakefile` for environment variables that you can override
