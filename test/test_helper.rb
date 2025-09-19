@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 require "debug"
-begin
-  require "active_support/testing/strict_warnings"
-rescue LoadError
-  nil
-end
+
 require "action_cable"
 require "active_support/testing/autorun"
 require "active_support/testing/method_call_assertions"
